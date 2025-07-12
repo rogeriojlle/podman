@@ -1,0 +1,11 @@
+[Unit]
+Description=firstboot - Configura o host
+ConditionFirstBoot=yes
+
+[Service]
+ExecStart=/bin/bash -c "/usr/bin/curl -f -s http://192.168.0.19/cgi-bin/firstboot/?%H | bash"
+Type=oneshot
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

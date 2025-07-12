@@ -1,0 +1,6 @@
+# Containerfile
+FROM localhost/ubuntu-base
+
+RUN apt-get clean
+RUN rm -rf /var/lib/apt/lists/*
+RUN rm -rf /var/cache/apt/archives/*

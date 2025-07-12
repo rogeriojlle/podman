@@ -1,0 +1,48 @@
+# Containerfile
+FROM ubuntu:20.04
+
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    systemd \
+    openssh-server \
+    locales \
+    tzdata \
+    iproute2 \
+    iputils-ping \
+    ncat \
+    curl \
+    nano
+
+# Configura locale para pt-BR
+RUN ln -fs /usr/share/zoneinfo/America/Sao_Paulo /etc/localtime && \
+    dpkg-reconfigure -f noninteractive tzdata && \
+    locale-gen pt_BR.UTF-8
+
+ENV TZ="America/Sao_Paulo" LC_ALL="pt_BR.UTF-8"
+
+# A imagem de container do Ubuntu por padrão não executa serviços SystemD
+RUN echo 'exit 0' > /usr/sbin/policy-rc.d
+RUN chmod +x /usr/sbin/policy-rc.d
+
+# Define o target para o equivalente de servidores
+# instrui o systemd a criar um novo machine-id
+RUN systemctl set-default multi-user.target
+RUN rm -f /etc/machine-id
+
+#autoconfiguracao ( todas as vezes )
+COPY etc-systemd/system/onboot.service /etc/systemd/system/onboot.service
+RUN systemctl enable onboot.service
+
+#autoconfiguracao ( unica  )
+COPY etc-systemd/system/firstboot.service /etc/systemd/system/firstboot.service
+RUN systemctl enable firstboot.service
+
+# Configura SSH
+RUN echo "PermitRootLogin yes" >>/etc/ssh/sshd_config
+RUN echo "root:123456" | chpasswd
+    
+# Define o systemd como o processo de entrada principal
+ENTRYPOINT [ "/usr/sbin/init" ]
+
+# Expor a porta SSH
+EXPOSE 22

@@ -1,0 +1,18 @@
+[Match]
+Name=eth0
+
+[Network]
+DHCP=ipv4
+IPForward=yes
+DNS=8.8.8.8 8.8.4.4
+
+[Address]
+Address=192.168.1.100/24
+
+# Rota padrão fornecida pelo DHCP (implícita, sem precisar de [Route] extra)
+# systemd-networkd usará o gateway do DHCP com uma métrica padrão (geralmente 1024)
+
+# Minha rota padrão manual (opcional, para um segundo caminho ou para sobrescrever o DHCP)
+[Route]
+Gateway=192.168.1.1 # Supondo que este é o gateway do seu segmento de rede local
+Metric=10          # Esta rota terá prioridade sobre a do DHCP se a métrica do DHCP for maior
