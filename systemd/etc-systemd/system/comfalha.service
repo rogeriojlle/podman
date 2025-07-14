@@ -1,0 +1,26 @@
+[Unit]
+Description=Serviço com Watchdog Avançado e Limite de Falhas
+
+[Service]
+Type=notify
+ExecStart=/usr/bin/python3 /usr/local/bin/my-recover-app.py
+
+# Detecta a falha se o sinal de vida não for recebido em 10 segundos
+WatchdogSec=10
+
+# Sempre tenta reiniciar em caso de falha
+Restart=always
+
+# ----------------- Regras de Limite de Falhas -----------------
+
+# Se o serviço falhar 5 vezes...
+StartLimitBurst=5
+
+# ...dentro de um período de 1 minuto (60 segundos)...
+StartLimitIntervalSec=1min
+
+# ...o sistema irá reiniciar.
+StartLimitAction=reboot
+
+[Install]
+WantedBy=multi-user.target

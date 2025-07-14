@@ -1,5 +1,5 @@
 # Containerfile
-FROM ubuntu:20.04
+FROM ubuntu:24.04
 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
@@ -25,14 +25,13 @@ RUN echo 'exit 0' > /usr/sbin/policy-rc.d
 RUN chmod +x /usr/sbin/policy-rc.d
 
 # Define o target para o equivalente de servidores
-# instrui o systemd a criar um novo machine-id
 RUN systemctl set-default multi-user.target
-RUN rm -f /etc/machine-id
+
+# Prepara o container a cada boot (serviços onboot e firstboot)
+COPY configcontainer/ /root/configcontainer/
+RUN chmod +x /root/configcontainer/*.sh
 
 WORKDIR /etc/systemd/system
-
-#autologin do root
-COPY etc-systemd/system/console-getty.service.d/override.conf console-getty.service.d/override.conf
 
 #autoconfiguracao ( todas as vezes )
 COPY etc-systemd/system/onboot.service onboot.service
@@ -42,12 +41,15 @@ RUN systemctl enable onboot.service
 COPY etc-systemd/system/firstboot.service firstboot.service
 RUN systemctl enable firstboot.service
 
+#autologin do root
+COPY etc-systemd/system/console-getty.service.d/override.conf console-getty.service.d/override.conf
+
 # Configura SSH
 RUN echo "PermitRootLogin yes" >>/etc/ssh/sshd_config
 RUN echo "root:123456" | chpasswd
-    
-# Define o systemd como o processo de entrada principal
-ENTRYPOINT [ "/usr/sbin/init" ]
 
 # Expor a porta SSH
 EXPOSE 22
+
+# Define o systemd como o processo de entrada principal
+ENTRYPOINT [ "/usr/lib/systemd/systemd", "--system" ]

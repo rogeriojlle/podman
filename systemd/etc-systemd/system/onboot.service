@@ -1,9 +1,10 @@
 [Unit]
-Description=onboot - Configura o host
+Description=onboot - Configura o host depois de reiniciar
 After=firstboot.service
 
 [Service]
-ExecStart=/bin/bash -c "/usr/bin/curl -f -s http://192.168.0.19/cgi-bin/onboot/?%H | bash"
+WorkingDirectory=/root/configcontainer
+ExecStart=/root/configcontainer/firstboot.sh
 Type=oneshot
 
 [Install]

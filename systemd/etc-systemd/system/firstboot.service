@@ -1,9 +1,10 @@
 [Unit]
-Description=firstboot - Configura o host
-ConditionFirstBoot=yes
+Description=firstboot - Configura o host na primeira vez
+ConditionPathExists=!/root/configcontainer/.firstboot
 
 [Service]
-ExecStart=/bin/bash -c "/usr/bin/curl -f -s http://192.168.0.19/cgi-bin/firstboot/?%H | bash"
+WorkingDirectory=/root/configcontainer
+ExecStart=/root/configcontainer/firstboot.sh
 Type=oneshot
 RemainAfterExit=yes
 
