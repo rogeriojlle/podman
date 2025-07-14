@@ -29,12 +29,17 @@ RUN chmod +x /usr/sbin/policy-rc.d
 RUN systemctl set-default multi-user.target
 RUN rm -f /etc/machine-id
 
+WORKDIR /etc/systemd/system
+
+#autologin do root
+COPY etc-systemd/system/console-getty.service.d/override.conf console-getty.service.d/override.conf
+
 #autoconfiguracao ( todas as vezes )
-COPY etc-systemd/system/onboot.service /etc/systemd/system/onboot.service
+COPY etc-systemd/system/onboot.service onboot.service
 RUN systemctl enable onboot.service
 
 #autoconfiguracao ( unica  )
-COPY etc-systemd/system/firstboot.service /etc/systemd/system/firstboot.service
+COPY etc-systemd/system/firstboot.service firstboot.service
 RUN systemctl enable firstboot.service
 
 # Configura SSH
