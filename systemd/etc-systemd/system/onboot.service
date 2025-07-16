@@ -4,7 +4,7 @@ After=firstboot.service
 
 [Service]
 WorkingDirectory=/root/configcontainer
-ExecStart=/root/configcontainer/firstboot.sh
+ExecStart=/root/configcontainer/onboot.sh
 Type=oneshot
 
 [Install]
