@@ -1,0 +1,26 @@
+#nome dado ao grupo de tarefas
+- name: "Tarefa Gigante em varios servidores"
+
+#onde no inventario se aplica
+  hosts: "containers"
+
+#coleta dados iniciais
+  gather_facts: "true"
+
+#se vai se tornar root antes
+  become: "true"
+
+#tarefas em si
+  tasks: 
+  - name: "executar um comando arbitrario"
+    ansible.builtin.shell:
+      cmd: "ip a"
+    register: comando_ip
+
+  - name: "mostrar o ip"
+    ansible.builtin.debug:
+      var: comando_ip.stdout_lines
+  
+  - name: "o que foi obtido de informacoes genericas"
+    ansible.builtin.debug:
+      var: ansible_facts
