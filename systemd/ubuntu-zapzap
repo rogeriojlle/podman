@@ -2,29 +2,44 @@
 FROM localhost/ubuntu-base
 
 RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y \
-    libgbm-dev libatk1.0-0 libc6 libcairo2 libcups2 \
-    libdbus-1-3 libexpat1 libfontconfig1 libgcc1 libgdk-pixbuf2.0-0 \
-    libglib2.0-0 libgtk-3-0 libnspr4 libpango-1.0-0 \
-    libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1 \
-    libxcb1 libxcomposite1 libxcursor1 libxdamage1 \
-    libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 \
-    libxss1 libxtst6 ca-certificates fonts-liberation \
-    libnss3 lsb-release xdg-utils wget \
-    nodejs npm
+    DEBIAN_FRONTEND=noninteractive apt-get install -y gpg
 
-RUN mkdir -p /opt/zapzap
+RUN curl -sfL https://raw.githubusercontent.com/Xpra-org/xpra/master/packaging/repos/noble/xpra.sources -o /etc/apt/sources.list.d/xpra.sources
+
+# Adicionar the Xpra GPG key
+RUN curl -sfL https://xpra.org/gpg.asc | gpg --dearmor | tee /etc/apt/trusted.gpg.d/xpra.gpg > /dev/null
+
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    fonts-liberation libappindicator3-1 libasound2t64 libatk-bridge2.0-0t64 libatk1.0-0t64 libcairo2 \
+    libcups2t64 libdbus-1-3 libdrm2 libexpat1 libfontconfig1 libgbm1 libgcc-s1 libglib2.0-0t64 \
+    libgtk-3-0t64 libnspr4 libnss3 libstdc++6 libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 \
+    libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libxshmfence1 libxtst6 xdg-utils \
+    xserver-xorg-video-dummy xpra nodejs npm
+
+RUN useradd -d /opt/zapzap -m -r zapzap
+
 WORKDIR /opt/zapzap
 
-COPY opt_zapzap/ /opt/zapzap/
+COPY zapzap/opt/zapzap/ /opt/zapzap/
 
 RUN npm init -y
 
 RUN npm install whatsapp-web.js qrcode
 
-RUN node index.js
+COPY zapzap/etc/systemd/system/xpra.service /etc/systemd/system/xpra.service
+COPY zapzap/etc/systemd/system/zapzap.service /etc/systemd/system/zapzap.service
+RUN systemctl enable xpra.service && systemctl enable zapzap.service
 
-RUN apt-get clean
-RUN rm -rf /var/lib/apt/lists/*
-RUN rm -rf /var/cache/apt/archives/*
+WORKDIR /
+COPY zapzap/ajusteXorg.diff /ajusteXorg.diff
+
+RUN patch -p0 < /ajusteXorg.diff && rm /ajusteXorg.diff
+
+#nesse ponto não me interessa esses serviços
+RUN systemctl disable onboot.service && systemctl disable firstboot.service
+
+# Limpeza de caches e arquivos temporários do APT e NPM
+#RUN apt-get clean && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
+#RUN npm cache clean --force
+#RUN rm -rf ~/.npm /tmp/*
 
