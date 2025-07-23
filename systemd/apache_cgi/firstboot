@@ -1,0 +1,27 @@
+#!/bin/bash
+
+RESPOSTA=""
+
+function apresentar () {
+    STATUS="${1:-200 OK}"
+    echo "Content-Type: text/plain; charset=UTF-8"
+    echo "Content-Language: pt-BR"
+    echo "Status: ${STATUS}"
+    echo ""
+    echo -e "${RESPOSTA}"
+}
+ 
+FILE="/etc/$(basename ${QUERY_STRING})"
+ 
+case $QUERY_STRING in
+    *-dc)
+        RESPOSTA="curl -f -s \"http://192.168.0.19/pacotes/samba/config-samba.sh\" | bash"
+        apresentar
+        ;;
+    *)
+        RESPOSTA="#sem ação"
+        apresentar "400 Bad Request"
+        ;;
+esac
+ 
+exit 0

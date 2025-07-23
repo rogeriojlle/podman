@@ -1,0 +1,11 @@
+--- /etc/X11/Xsession.d/20x11-common_process-args       2021-10-19 06:04:11.000000000 -0300
++++ /tmp/novo   2025-07-17 18:57:31.263016354 -0300
+@@ -33,7 +33,7 @@
+         ;;
+       *)
+         # Specific program was requested.
+-        STARTUP_FULL_PATH=$(command -v "${1%% *}" || true)
++        STARTUP_FULL_PATH=$(/usr/bin/which "${1%% *}" || true)
+         if [ -n "$STARTUP_FULL_PATH" ] && [ -e "$STARTUP_FULL_PATH" ]; then
+           if [ -x "$STARTUP_FULL_PATH" ]; then
+             STARTUP="$1"

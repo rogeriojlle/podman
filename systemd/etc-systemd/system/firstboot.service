@@ -1,0 +1,12 @@
+[Unit]
+Description=firstboot - Configura o host na primeira vez
+ConditionPathExists=!/root/configcontainer/.firstboot
+
+[Service]
+WorkingDirectory=/root/configcontainer
+ExecStart=/root/configcontainer/firstboot.sh
+Type=oneshot
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,5 @@
+[Unit]
+Description=Target para Xpra e ZapZap
+Requires=network.target xpra.service zapzap.service
+After=network.target xpra.service zapzap.service
+Wants=network.target dbus.service xpra.service zapzap.service

@@ -1,0 +1,9 @@
+[Unit]
+Description=toma acoes em caso de falha de algum serviço
+
+[Service]
+Type=simple
+ExecStart=/opt/alertafalha.sh '%i'
+
+[Install]
+WantedBy=multi-user.target

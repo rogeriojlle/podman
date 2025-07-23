@@ -1,0 +1,46 @@
+# Containerfile
+FROM ubuntu:24.04
+
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    systemd openssh-server locales tzdata iproute2 \
+    iputils-ping ncat curl nano xz-utils patch gpg \
+    jq
+
+# Configura locale para pt-BR
+RUN ln -fs /usr/share/zoneinfo/America/Sao_Paulo /etc/localtime && \
+    dpkg-reconfigure -f noninteractive tzdata && \
+    locale-gen pt_BR.UTF-8
+
+# A imagem de container do Ubuntu por padrão não executa serviços SystemD
+RUN echo 'exit 0' > /usr/sbin/policy-rc.d && chmod +x /usr/sbin/policy-rc.d
+
+# Define o target para o equivalente de servidores
+RUN systemctl set-default multi-user.target
+
+# Prepara o container a cada boot (serviços onboot e firstboot)
+COPY configcontainer/ /root/configcontainer/
+RUN chmod +x /root/configcontainer/*.sh
+
+WORKDIR /etc/systemd/system
+
+#autoconfiguracao ( todas as vezes )
+COPY etc-systemd/system/onboot.service onboot.service
+RUN systemctl enable onboot.service
+
+#autoconfiguracao ( unica  )
+COPY etc-systemd/system/firstboot.service firstboot.service
+RUN systemctl enable firstboot.service
+
+#autologin do root
+COPY etc-systemd/system/console-getty.service.d/override.conf console-getty.service.d/override.conf
+
+# Configura SSH
+RUN echo "PermitRootLogin yes" >>/etc/ssh/sshd_config
+RUN echo "root:123456" | chpasswd
+
+# Expor a porta SSH
+EXPOSE 22
+
+# Define o systemd como o processo de entrada principal
+ENTRYPOINT [ "/usr/lib/systemd/systemd" ]

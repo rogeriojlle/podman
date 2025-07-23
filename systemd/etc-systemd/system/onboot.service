@@ -1,0 +1,11 @@
+[Unit]
+Description=onboot - Configura o host depois de reiniciar
+After=firstboot.service
+
+[Service]
+WorkingDirectory=/root/configcontainer
+ExecStart=/root/configcontainer/onboot.sh
+Type=oneshot
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,32 @@
+# Containerfile
+
+# Não foi editado o arquivo que permite administração remota via pagina web
+# neste caso mapeie a porta 8080 via ssh ( ssh@container -L 8080:localhost:8080 )
+
+FROM localhost/ubuntu-base
+ 
+RUN curl -s -f "https://dlcdn.apache.org/tomcat/tomcat-11/v11.0.9/bin/apache-tomcat-11.0.9.tar.gz" | tar -zxf - -C /opt
+
+RUN ln -s /opt/apache-tomcat-11.0.9 /opt/tomcat
+
+RUN apt install -y openjdk-17-jdk-headless
+
+COPY tomcat/opt/tomcat/conf/tomcat-users.xml /opt/tomcat/conf/tomcat-users.xml
+
+RUN groupadd tomcat
+
+RUN useradd -s /bin/false -g tomcat -d /opt/tomcat tomcat
+
+RUN chown -R tomcat:tomcat /opt/tomcat/*
+
+RUN chmod -R g+r /opt/tomcat/conf
+
+RUN chmod g+x /opt/tomcat/bin
+
+COPY tomcat/etc/systemd/system/tomcat.service /etc/systemd/system/tomcat.service
+
+RUN systemctl enable tomcat
+
+RUN apt-get clean
+RUN rm -rf /var/lib/apt/lists/*
+RUN rm -rf /var/cache/apt/archives/*

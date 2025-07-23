@@ -1,0 +1,26 @@
+# Containerfile
+FROM localhost/ubuntu-base
+
+
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    adduser libfontconfig1 musl
+
+COPY grafana/grafana-enterprise.deb /tmp/
+
+RUN dpkg -i /tmp/grafana-enterprise.deb && \
+    rm /tmp/grafana-enterprise.deb && \
+    systemctl enable grafana-server
+
+COPY grafana/opt/ /opt/
+
+#ativar o serviço de mini api
+COPY grafana/etc/systemd/system/ /etc/systemd/system
+RUN systemctl enable mini-api.service
+
+RUN apt-get clean
+RUN rm -rf /var/lib/apt/lists/*
+RUN rm -rf /var/cache/apt/archives/*
+
+
+EXPOSE 3000

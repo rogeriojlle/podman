@@ -1,0 +1,9 @@
+[Unit]
+Description=Envia e-mail
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/echo "O serviço %i não está funcionando" | /usr/bin/sendmail -s "Alerta" "fulano@sisnema.lan"
+
+[WantedBy]
+multi-user.target

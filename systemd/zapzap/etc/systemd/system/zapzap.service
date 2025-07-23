@@ -1,0 +1,20 @@
+[Unit]
+Description=Zapzap
+After=xpra.service
+Requires=xpra.service
+BindsTo=xpra.service
+
+[Service]
+Type=simple
+KillMode=control-group
+TimeoutStopSec=10
+User=zapzap
+Group=zapzap
+EnvironmentFile=/opt/zapzap/defaults.env
+WorkingDirectory=/opt/zapzap
+ExecStart=node --env-file=./defaults.env --inspect index.js
+RestartSec=10
+Restart=always
+
+[Install]
+WantedBy=xpra-zapzap.target

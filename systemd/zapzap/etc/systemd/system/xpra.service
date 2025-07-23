@@ -1,0 +1,37 @@
+[Unit]
+Description=Xpra
+BindsTo=zapzap.service
+
+[Service]
+Type=simple
+User=zapzap
+Group=zapzap
+RuntimeDirectory=zapzap
+RuntimeDirectoryMode=0700
+EnvironmentFile=/opt/zapzap/defaults.env
+WorkingDirectory=/opt/zapzap
+PrivateTmp=true
+RestartSec=5
+Restart=always
+
+ExecStart=/usr/bin/xpra start \
+  --daemon=no \
+  --xvfb=Xdummy \
+  --resize-display=800x600 \
+  --bind-tcp=0.0.0.0:10000 \
+  --html=on \
+  --speaker=disabled \
+  --microphone=disabled \
+  --webcam=no \
+  --pulseaudio=no \
+  --file-transfer=off \
+  --bell=no \
+  --printing=no \
+  --webcam=no \
+  --quality=0 \
+  "${DISPLAY}"
+
+ExecStop=/usr/bin/xpra stop --display=${DISPLAY}
+  
+[Install]
+WantedBy=xpra-zapzap.target
