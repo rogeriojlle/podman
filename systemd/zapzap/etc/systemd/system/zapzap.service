@@ -2,19 +2,22 @@
 Description=Zapzap
 After=xpra.service
 Requires=xpra.service
-BindsTo=xpra.service
+PartOf=xpra.service
 
 [Service]
 Type=simple
 KillMode=control-group
 TimeoutStopSec=10
+TimeoutStartSec=120s
 User=zapzap
 Group=zapzap
 EnvironmentFile=/opt/zapzap/defaults.env
 WorkingDirectory=/opt/zapzap
+ExecStartPre=/bin/sh -c 'until /usr/bin/xpra id ${DISPLAY} &> /dev/null; do echo "Aguardando display Xpra em ${DISPLAY}..."; sleep 1; done'
 ExecStart=node --env-file=./defaults.env --inspect index.js
-RestartSec=10
+RestartSec=5
 Restart=always
+RestartForceExitStatus=0
 
 [Install]
 WantedBy=xpra-zapzap.target

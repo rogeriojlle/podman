@@ -20,8 +20,10 @@ RUN useradd -d /opt/zapzap -m -r zapzap
 #RUN patch -p0 < /ajusteXorg.diff && rm /ajusteXorg.diff
 
 WORKDIR /opt/zapzap
-COPY --exclude=.wwebjs_auth zapzap/opt/zapzap/ /opt/zapzap/
 RUN npm init -y && npm install whatsapp-web.js qrcode
+COPY --exclude=.wwebjs_auth zapzap/opt/zapzap/ /opt/zapzap/
+RUN chmod +x ./xpra-service.sh
+
 
 #nesse ponto não me interessa esses serviços
 RUN systemctl disable onboot.service \
@@ -31,7 +33,7 @@ RUN systemctl disable onboot.service \
   && systemctl mask cups.service
 
 
-COPY zapzap/etc/systemd/system/ /etc/systemd/system/
+COPY zapzap/etc/ /etc/
 RUN systemctl enable xpra.service \
   && systemctl enable zapzap.service \
   && systemctl set-default xpra-zapzap.target
