@@ -2,19 +2,15 @@
 
 SD_NOTIFY="/usr/bin/systemd-notify"
 
-${SD_NOTIFY} --pid=${$}
-
 echo "[$0] Iniciando Xpra em ${DISPLAY}..."
 
 # Executa o comando xpra start em segundo plano
-# `&` para rodar em background e continuar o script.
 # Captura o PID do Xpra para monitoramento posterior, se necessário.
 /usr/bin/xpra start \
   --daemon=no \
   --xvfb=Xdummy \
   --exit-with-windows=yes \
   --resize-display=800x600 \
-  --bind-tcp=0.0.0.0:10000 \
   --html=on \
   --http-scripts=off \
   --speaker=disabled \
@@ -29,8 +25,13 @@ echo "[$0] Iniciando Xpra em ${DISPLAY}..."
   --input-method=none \
   --pulseaudio=no \
   --mdns=no \
-  --dbus-launch=no \
-  --dbus-control=no \
+  --dbus=no \
+  --systemd-run=no \
+  --notifications=no \
+  --tray=no \
+  --start-new-commands=no \
+  --bind-tcp="0.0.0.0${DISPLAY}" \
+  --dbus=no \
   "${DISPLAY}" &
 XPRA_PID=$! # Pega o PID do processo xpra start
 

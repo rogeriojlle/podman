@@ -1,0 +1,19 @@
+[Unit]
+Description=Api Zapzap
+After=zapzap.service
+Requires=zapzap.service
+PartOf=zapzap.service
+
+[Service]
+Type=simple
+User=zapzap
+Group=zapzap
+EnvironmentFile=/opt/zapzap/defaults.env
+WorkingDirectory=/opt/zapzap
+StateDirectory=zapzap
+ExecStart=node --env-file=./defaults.env api.js
+RestartSec=5
+Restart=always
+
+[Install]
+WantedBy=xpra-zapzap.target

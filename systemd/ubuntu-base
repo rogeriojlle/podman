@@ -43,4 +43,4 @@ RUN echo "root:123456" | chpasswd
 EXPOSE 22
 
 # Define o systemd como o processo de entrada principal
-ENTRYPOINT [ "/usr/lib/systemd/systemd" ]
+ENTRYPOINT [ "/usr/sbin/init" ]

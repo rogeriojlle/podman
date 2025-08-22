@@ -1,8 +1,32 @@
-# Containerfile
-FROM localhost/ubuntu-base
+# -- Stage de Build --
+# Esta etapa inclui as ferramentas necessárias para compilar os pacotes
+FROM localhost/ubuntu-base AS build-stage
 
+# Instalação do Node.js
 RUN curl -sfL 'https://nodejs.org/dist/v22.17.1/node-v22.17.1-linux-x64.tar.xz' | tar -xJ --strip-components=1 -C /usr/local
 
+# Instalação dos pacotes de desenvolvimento necessários
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+  build-essential git python3 libsystemd-dev unzip
+
+# Download do Chromium em /opt
+RUN curl -sfLl https://download-chromium.appspot.com/dl/Linux_x64?type=snapshots -o /tmp/chromium.zip
+RUN unzip /tmp/chromium.zip -d /opt/
+
+# Configuração do ambiente de trabalho
+WORKDIR /opt/zapzap
+
+# Instalação das dependências
+RUN npm init -y && npm install whatsapp-web.js qrcode polka sd-notify
+
+# --- Stage Final ---
+# Esta etapa é a imagem final, otimizada para rodar a aplicação
+FROM localhost/ubuntu-base AS final-stage
+
+# Copia o Node.js da imagem de build
+COPY --from=build-stage /usr/local /usr/local
+
+# Instalação das dependências de runtime
 RUN curl -sfL https://raw.githubusercontent.com/Xpra-org/xpra/master/packaging/repos/noble/xpra.sources -o /etc/apt/sources.list.d/xpra.sources
 RUN curl -sfL https://xpra.org/gpg.asc -o /usr/share/keyrings/xpra.asc
 
@@ -15,32 +39,37 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
 
 RUN useradd -d /opt/zapzap -m -r zapzap
 
-#WORKDIR /
-#COPY zapzap/ajusteXorg.diff /ajusteXorg.diff
-#RUN patch -p0 < /ajusteXorg.diff && rm /ajusteXorg.diff
-
+# Ajustes e configurações finais
 WORKDIR /opt/zapzap
-RUN npm init -y && npm install whatsapp-web.js qrcode
 COPY --exclude=.wwebjs_auth zapzap/opt/zapzap/ /opt/zapzap/
 RUN chmod +x ./xpra-service.sh
 
-
-#nesse ponto não me interessa esses serviços
+# Desabilita serviços desnecessarios
 RUN systemctl disable onboot.service \
   && systemctl disable firstboot.service \
   && systemctl disable xpra-server.socket \
   && systemctl disable systemd-resolved.service \
-  && systemctl mask cups.service
+  && systemctl disable cups.service
 
+# remove o menu flutuante na página web do xpra
+RUN echo 'floating_menu = no' >> /etc/xpra/html5-client/default-settings.txt
 
+# Copia arquivos de configuração do sistema e habilita serviços
 COPY zapzap/etc/ /etc/
 RUN systemctl enable xpra.service \
   && systemctl enable zapzap.service \
+  && systemctl enable api.service \
   && systemctl set-default xpra-zapzap.target
 
-EXPOSE 10000 6789
+# Copia os módulos Node.js da imagem de build
+COPY --from=build-stage /opt/zapzap /opt/zapzap
 
-# Limpeza de caches e arquivos temporários do APT e NPM
+# Copia o Chromium descompactado da imagem de build
+COPY --from=build-stage /opt/chrome-linux /opt/chrome-linux
+
+# Limpeza final
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
 RUN npm cache clean --force
 RUN rm -rf ~/.npm /tmp/*
+
+EXPOSE 10000 6789
