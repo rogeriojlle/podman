@@ -1,0 +1,23 @@
+FROM fedora:42
+
+RUN curl -sflL 'https://raw.githubusercontent.com/Xpra-org/xpra/master/packaging/repos/Fedora/xpra.repo' > /etc/yum.repos.d/xpra.repo
+
+RUN dnf update -y
+
+RUN dnf install -y xpra-server xpra-html5
+
+RUN dnf remove -y xpra-codecs-nvidia
+
+RUN dnf clean all
+
+#RUN echo 'floating_menu = no' >> /etc/xpra/html5-client/default-settings.txt
+
+COPY xpra/xpra /xpra
+
+WORKDIR /xpra
+
+COPY defaults.env /xpra/defaults.env
+
+RUN chmod +x /xpra/*.sh
+
+ENTRYPOINT ["/xpra/entrypoint.sh"]

@@ -1,0 +1,19 @@
+FROM fedora:42
+
+RUN dnf install -y \
+    nodejs chromium \
+    && dnf clean all
+
+RUN mkdir /zapzap
+
+WORKDIR /zapzap
+
+RUN npm init -y
+
+RUN npm install whatsapp-web.js qrcode polka ws bufferutil utf-8-validate
+
+COPY defaults.env /zapzap/defaults.env
+
+COPY chromium/zapzap/ /zapzap/
+
+ENTRYPOINT [ "node", "--env-file=./defaults.env", "--inspect" ,"index.js" ]

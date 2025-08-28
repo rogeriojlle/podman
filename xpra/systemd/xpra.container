@@ -1,0 +1,13 @@
+[Unit]
+Description=Container Zapzap Xpra
+Requires=zapzap-pod.service
+After=zapzap-pod.service
+
+[Container]
+Pod=zapzap.pod
+ContainerName=xpra
+Image=zapzap-xpra:latest
+PodmanArgs=--rm
+
+[Service]
+Restart=always

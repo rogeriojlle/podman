@@ -1,0 +1,9 @@
+[Unit]
+Description=ZapZap Pod
+
+[Pod]
+PodName=pod-zapzap
+Network=podman
+PublishPort=10000:10000
+PublishPort=6789:6789
+Volume=chromium-datapath:/zapzap/chromium-data

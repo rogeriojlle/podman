@@ -1,0 +1,14 @@
+[Unit]
+Description=Container Zapzap Chromium
+Requires=zapzap-pod.service xpra.service
+After=zapzap-pod.service xpra.service
+PartOf=xpra.service
+
+[Container]
+Pod=zapzap.pod
+ContainerName=chromium
+Image=zapzap-chromium:latest
+PodmanArgs=--rm
+
+[Service]
+Restart=always
